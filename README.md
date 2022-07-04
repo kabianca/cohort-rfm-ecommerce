@@ -1,4 +1,4 @@
-# Projeto 6 - 
+# Projeto 3 - Segmentação de Clientes em E-commerce
 
 ## Certificação em Análise Dados, Laboratória e IBM 🌟
 
