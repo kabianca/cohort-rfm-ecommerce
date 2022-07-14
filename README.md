@@ -10,6 +10,8 @@ Esse projeto tem como principal objetivo obter métricas e indicadores tais como
 uma análise de coorte, além de realizar uma segmentação de clientes por meio da Recência, Frequência e Valor gasto (RFM). Desta forma, será possível 
 recomendar estratégias específicas para a UK Merch efetuar com cada um destes segmentos de clientes.
 
+[Relatório DataStudio](https://datastudio.google.com/reporting/5ef0b7fd-038f-409e-9bc5-08176e4d8398)
+
 #### Objetivos de aprendizagem
 
 - **Pré-processar os dados:** identificar dados duplicados, em branco ou fora do domínio (por exemplo, valores negativos quando não aplicável) para preparar seus dados para análise posterior.
@@ -18,8 +20,6 @@ recomendar estratégias específicas para a UK Merch efetuar com cada um destes 
 - **Visualizar dados:** construir gráficos de linhas e barras para visualizar informações, resumir descobertas, encontrar padrões ou comparar diferentes séries de dados.
 - **Fazer uma análise de coorte:** organizar as informações para formar coortes de clientes de acordo com a data de entrada no produto/serviço. Realizar cálculos e formatar as informações para encontrar mapas de calor. Identificar pontos de fuga.
 - **Segmentar clientes com o modelo RFM:** entender a regra de Pareto e utilizá-la para identificar os principais clientes do negócio, a fim de concentrar esforços e obter o maior retorno (80/20).
-
-[Relatório DataStudio](https://datastudio.google.com/reporting/5ef0b7fd-038f-409e-9bc5-08176e4d8398)
 
 ## Fontes
 Banco de dados: [Kaggle](https://www.kaggle.com/himanshupoddar/zomato-bangalore-restaurants)
