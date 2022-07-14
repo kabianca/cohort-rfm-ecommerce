@@ -19,6 +19,8 @@ recomendar estratégias específicas para a UK Merch efetuar com cada um destes 
 - **Fazer uma análise de coorte:** organizar as informações para formar coortes de clientes de acordo com a data de entrada no produto/serviço. Realizar cálculos e formatar as informações para encontrar mapas de calor. Identificar pontos de fuga.
 - **Segmentar clientes com o modelo RFM:** entender a regra de Pareto e utilizá-la para identificar os principais clientes do negócio, a fim de concentrar esforços e obter o maior retorno (80/20).
 
+[Relatório DataStudio](https://datastudio.google.com/reporting/5ef0b7fd-038f-409e-9bc5-08176e4d8398)
 
 ## Fontes
 Banco de dados: [Kaggle](https://www.kaggle.com/himanshupoddar/zomato-bangalore-restaurants)
+
