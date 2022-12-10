@@ -12,6 +12,8 @@ recomendar estratégias específicas para a UK Merch efetuar com cada um destes 
 
 [Relatório DataStudio](https://datastudio.google.com/reporting/5ef0b7fd-038f-409e-9bc5-08176e4d8398)
 
+![imagem do relatorio](https://github.com/kabianca/cohort-rfm-ecommerce/blob/main/Screenshot_report.png?raw=true)
+
 #### Objetivos de aprendizagem
 
 - **Pré-processar os dados:** identificar dados duplicados, em branco ou fora do domínio (por exemplo, valores negativos quando não aplicável) para preparar seus dados para análise posterior.
