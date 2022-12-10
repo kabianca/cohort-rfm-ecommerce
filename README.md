@@ -22,5 +22,5 @@ recomendar estratégias específicas para a UK Merch efetuar com cada um destes 
 - **Segmentar clientes com o modelo RFM:** entender a regra de Pareto e utilizá-la para identificar os principais clientes do negócio, a fim de concentrar esforços e obter o maior retorno (80/20).
 
 ## Fontes
-Banco de dados: [Kaggle](https://www.kaggle.com/himanshupoddar/zomato-bangalore-restaurants)
+Banco de dados: [Kaggle](https://www.kaggle.com/datasets/datacertlaboratoria/projeto-3-segmentao-de-clientes-no-ecommerce)
 
