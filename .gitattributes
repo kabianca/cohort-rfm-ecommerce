@@ -1,0 +1,3 @@
+   git add .gitattributes
+   git commit -m "fix: contabilizar notebooks como Python nas estatísticas de linguagem"
+   git push
