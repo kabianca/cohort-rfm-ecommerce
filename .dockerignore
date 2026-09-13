@@ -1,0 +1,16 @@
+.git
+.github
+data
+logs
+legacy
+docs
+tests/__pycache__
+**/__pycache__
+**/*.py[cod]
+.pytest_cache
+.ruff_cache
+.venv
+.idea
+.vscode
+*.ipynb
+.env
