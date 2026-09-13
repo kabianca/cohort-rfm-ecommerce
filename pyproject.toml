@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ancora"
+version = "0.1.0"
+description = "Deterministic RFM and cohort segmentation over the UCI Online Retail dataset: PySpark, Delta Lake, DuckDB"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+requires-python = ">=3.10"
+authors = [{ name = "Karla Oliveira" }]
+
+# Spark, Delta and Java must be pinned together; the Java side of the triple
+# lives in the Dockerfile. This pairing was checked against PyPI, Maven Central
+# and the Delta 4.4.0 release notes on 2026-09-13: Delta 4.4.0 is built and
+# tested against Spark 4.2.0 and requires Java 17+. Do not bump one without the
+# other two.
+dependencies = [
+    "pyspark==4.2.0",
+    "delta-spark==4.4.0",
+    "duckdb==1.5.5",
+    "matplotlib>=3.9",
+    "openpyxl>=3.1",  # the UCI archive ships the dataset as .xlsx; `make data` converts it once
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.setuptools.packages.find]
+include = ["ancora*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

@@ -1,0 +1,14 @@
+services:
+  ancora:
+    build: .
+    image: ancora:local
+    # The source tree is mounted over the editable install so a change on the
+    # host is live in the container without a rebuild. ./data holds every
+    # layer of the lakehouse and is never committed.
+    volumes:
+      - ./ancora:/app/ancora
+      - ./tests:/app/tests
+      - ./docs:/app/docs
+      - ./data:/app/data
+    environment:
+      ANCORA_DATA_DIR: /app/data

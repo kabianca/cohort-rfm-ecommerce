@@ -1,0 +1,27 @@
+# Working brief; a public docs/DESIGN.md will be distilled from it later
+docs/design.md
+
+# Never committed
+.env
+data/
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Spark / Delta local litter
+spark-warehouse/
+metastore_db/
+derby.log
+
+# IDEs
+.idea/
+.vscode/
+.ipynb_checkpoints/

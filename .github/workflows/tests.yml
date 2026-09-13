@@ -1,0 +1,57 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest (Spark 4.2.0 · Delta 4.4.0 · Java 21)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      # The suite runs inside the same image `make build` produces, so the
+      # badge asserts what a clone gets: the pinned Spark / Delta / Java
+      # triple actually works together. Layers are cached between runs;
+      # pyspark alone is 400 MB and nobody wants to download it per push.
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: ancora:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Versions inside the image
+        run: |
+          docker run --rm ancora:local sh -c '
+            java -version 2>&1 | head -1
+            python --version
+            pip list 2>/dev/null | grep -Ei "^(pyspark|delta.spark|duckdb) "'
+
+      # The container runs as UID 1000; the runner is not. The bind-mounted
+      # data/ must be writable by both, or a test that lands a table fails
+      # on permissions instead of on its assertion.
+      - name: Prepare the bind mounts
+        run: mkdir -p data && chmod a+rwx data
+
+      - name: Lint
+        run: make lint
+
+      - name: Test suite
+        run: make test

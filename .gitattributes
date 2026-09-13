@@ -1,1 +1,3 @@
-*.ipynb linguist-language=Python
+# The legacy notebook is kept for the record; keep its 550 KB of JSON out of
+# the language statistics so they reflect the current code.
+legacy/** linguist-vendored
