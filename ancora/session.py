@@ -5,11 +5,15 @@ input disagree, or make the container need the network at run time.
 """
 
 import os
+from glob import glob
+from pathlib import Path
 
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
 
 from ancora.config import IVY_DIR
+
+LOG_CONFIG = Path(__file__).with_name("log4j2.properties")
 
 
 def get_spark(app_name: str = "ancora") -> SparkSession:
@@ -31,8 +35,16 @@ def get_spark(app_name: str = "ancora") -> SparkSession:
         # without network. Bind to loopback and stop asking.
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
-        .config("spark.jars.ivy", IVY_DIR)
+        .config("spark.driver.extraJavaOptions", f"-Dlog4j2.configurationFile=file:{LOG_CONFIG}")
         .config("spark.ui.enabled", "false")
-        .config("spark.driver.extraJavaOptions", "-Dlog4j2.level=WARN")
+        .config("spark.ui.showConsoleProgress", "false")
     )
-    return configure_spark_with_delta_pip(builder).getOrCreate()
+
+    # The image pre-fetches the Delta jars at build time. Handing them to
+    # Spark by path skips Ivy entirely: no resolution banner, no network, and
+    # exactly the artefacts that were verified. Outside the image, fall back to
+    # letting delta-spark resolve them from Maven.
+    jars = sorted(glob(f"{IVY_DIR}/jars/*.jar"))
+    if jars:
+        return builder.config("spark.jars", ",".join(jars)).getOrCreate()
+    return configure_spark_with_delta_pip(builder.config("spark.jars.ivy", IVY_DIR)).getOrCreate()

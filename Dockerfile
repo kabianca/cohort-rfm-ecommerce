@@ -38,9 +38,11 @@ COPY ancora ./ancora
 
 # Fetch the Delta jars and DuckDB's delta extension now, into directories any
 # UID can read, so that a run (and the test suite) needs no network. A first
-# SparkSession is enough for Ivy to resolve and cache the artefacts.
+# SparkSession with an empty jar directory makes delta-spark resolve them
+# through Ivy; every later session finds them there and skips Ivy.
 RUN mkdir -p /opt/ivy /opt/duckdb-extensions \
  && python -c "from ancora.session import get_spark; get_spark().stop()" \
+ && test -n "$(ls /opt/ivy/jars/*.jar)" \
  && python -c "import duckdb, os; c = duckdb.connect(config={'extension_directory': os.environ['ANCORA_DUCKDB_EXTENSION_DIR']}); c.install_extension('delta'); c.load_extension('delta')" \
  && chmod -R a+rwX /opt/ivy /opt/duckdb-extensions \
  && mkdir -p /app/data && chown -R ancora:ancora /app

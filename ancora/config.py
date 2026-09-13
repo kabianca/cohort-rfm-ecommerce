@@ -1,20 +1,55 @@
 """Paths and runtime knobs, all overridable through the environment.
 
-Kept as plain module-level constants so a test can point the whole pipeline at
-a temporary directory by setting one variable before the session is built.
+The lakehouse layout is a value, not a set of globals, so a test can run the
+whole pipeline inside a temporary directory without touching the environment.
 """
 
 import os
+from dataclasses import dataclass
 from pathlib import Path
+
+
+@dataclass(frozen=True)
+class Layout:
+    root: Path
+
+    @property
+    def raw(self) -> Path:
+        return self.root / "raw"
+
+    @property
+    def bronze(self) -> Path:
+        return self.root / "bronze" / "online_retail"
+
+    @property
+    def silver_sales(self) -> Path:
+        return self.root / "silver" / "sales"
+
+    @property
+    def silver_quarantine(self) -> Path:
+        return self.root / "silver" / "quarantine"
+
+    @property
+    def gold_customer_rfm(self) -> Path:
+        return self.root / "gold" / "customer_rfm"
+
+    @property
+    def gold_cohort_retention(self) -> Path:
+        return self.root / "gold" / "cohort_retention"
+
+    @property
+    def gold_monthly_sales(self) -> Path:
+        return self.root / "gold" / "monthly_sales"
+
+    @property
+    def serving_db(self) -> Path:
+        return self.root / "serving" / "ancora.duckdb"
+
 
 # Root of the lakehouse on disk. Bind-mounted from ./data by docker-compose.
 DATA_DIR = Path(os.environ.get("ANCORA_DATA_DIR", "data"))
-
-RAW_DIR = DATA_DIR / "raw"
-BRONZE_DIR = DATA_DIR / "bronze"
-SILVER_DIR = DATA_DIR / "silver"
-GOLD_DIR = DATA_DIR / "gold"
-SERVING_DB = DATA_DIR / "serving" / "ancora.duckdb"
+DEFAULT_LAYOUT = Layout(DATA_DIR)
+RAW_DIR = DEFAULT_LAYOUT.raw
 
 # Where Spark resolves the Delta jars. Fixed outside $HOME so the cache warmed at
 # image build time is found whatever UID runs the container (bind mounts make
