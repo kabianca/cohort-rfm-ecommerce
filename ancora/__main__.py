@@ -1,5 +1,6 @@
 """`python -m ancora run [--snapshot-date YYYY-MM-DD] [--source FILE]`
-`python -m ancora charts [--out DIR]`"""
+`python -m ancora charts [--out DIR]`
+`python -m ancora fingerprint`"""
 
 import argparse
 from datetime import date
@@ -29,9 +30,17 @@ def main(argv=None) -> None:
     )
 
     charts = commands.add_parser("charts", help="draw the README figures from the serving database")
-    charts.add_argument("--out", type=Path, default=Path("docs/img"), help="directory for the PNG files")
+    charts.add_argument(
+        "--out", type=Path, default=Path("docs/img"), help="directory for the PNG files"
+    )
+
+    commands.add_parser("fingerprint", help="row count and content hash of customer_rfm")
 
     args = parser.parse_args(argv)
+    if args.command == "fingerprint":
+        rows, digest = serving.fingerprint(DEFAULT_LAYOUT)
+        print(f"{rows} customers  {digest}")
+        return
     if args.command == "charts":
         for path in serving.render_charts(DEFAULT_LAYOUT, args.out):
             print(f"wrote {path}")

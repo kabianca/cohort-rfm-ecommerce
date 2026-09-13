@@ -37,4 +37,6 @@ def test_a_fully_cancelled_customer_founds_no_cohort(run):
 
 def test_retention_is_relative_to_cohort_size(run):
     for r in run.cohort.collect():
-        assert r.retention_rate == (Decimal(r.customers) / Decimal(r.cohort_size)).quantize(Decimal("0.0001"))
+        assert r.retention_rate == (Decimal(r.customers) / Decimal(r.cohort_size)).quantize(
+            Decimal("0.0001")
+        )

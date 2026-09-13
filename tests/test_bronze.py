@@ -4,7 +4,9 @@ from tests.conftest import FIXTURE, read_delta
 
 
 def test_every_raw_column_is_text(run):
-    assert [f.dataType.simpleString() for f in run.bronze.schema if f.name in RAW_COLUMNS] == ["string"] * 8
+    assert [f.dataType.simpleString() for f in run.bronze.schema if f.name in RAW_COLUMNS] == [
+        "string"
+    ] * 8
 
 
 def test_no_row_is_lost_or_coerced(run):

@@ -16,9 +16,9 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless: the container has no display
 
-import matplotlib.pyplot as plt  # noqa: E402
-from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
-from matplotlib.ticker import FuncFormatter  # noqa: E402
+import matplotlib.pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import FuncFormatter
 
 from ancora.config import DUCKDB_EXTENSION_DIR, Layout
 
@@ -64,6 +64,21 @@ def refresh(layout: Layout) -> Path:
     return layout.serving_db
 
 
+def fingerprint(layout: Layout) -> tuple[int, str]:
+    """Row count and one hash over the whole of `customer_rfm`, in a fixed
+    order, so two runs can be compared in a single line."""
+    con = connect(layout.serving_db)
+    try:
+        return con.execute(
+            "SELECT count(*), md5(string_agg("
+            "  customer_id || '|' || snapshot_date || '|' || rfm || '|' || segment"
+            "  || '|' || monetary || '|' || recency_days, ',' ORDER BY snapshot_date, customer_id))"
+            "FROM customer_rfm"
+        ).fetchone()
+    finally:
+        con.close()
+
+
 # --- charts -----------------------------------------------------------------
 
 
@@ -80,8 +95,12 @@ def _style(ax, *, grid_axis: str = "y") -> None:
 
 
 def _title(fig, title: str, subtitle: str) -> None:
-    fig.text(0.06, 0.95, title, fontsize=12.5, fontweight="semibold", color=INK, ha="left", va="top")
-    fig.text(0.06, 0.895, subtitle, fontsize=9, color=INK_SECONDARY, ha="left", va="top", linespacing=1.5)
+    fig.text(
+        0.06, 0.95, title, fontsize=12.5, fontweight="semibold", color=INK, ha="left", va="top"
+    )
+    fig.text(
+        0.06, 0.895, subtitle, fontsize=9, color=INK_SECONDARY, ha="left", va="top", linespacing=1.5
+    )
 
 
 def _figure(width: float = 9, height: float = 4.4):
@@ -112,15 +131,40 @@ def chart_monthly_revenue(con, path: Path) -> Path:
     x = range(len(months))
     ax.bar(x, identified, width=0.55, color=DEEMPHASIS, label="Identified customer")
     # A 2px stroke in the surface colour is the gap between stacked segments.
-    ax.bar(x, unidentified, width=0.55, bottom=identified, color=BLUE,
-           edgecolor=SURFACE, linewidth=1.5, label="No CustomerID")
-    ax.set_xticks(list(x), [m.strftime("%b\n%Y") if m.month in (1, 12) else m.strftime("%b") for m in months])
+    ax.bar(
+        x,
+        unidentified,
+        width=0.55,
+        bottom=identified,
+        color=BLUE,
+        edgecolor=SURFACE,
+        linewidth=1.5,
+        label="No CustomerID",
+    )
+    ax.set_xticks(
+        list(x), [m.strftime("%b\n%Y") if m.month in (1, 12) else m.strftime("%b") for m in months]
+    )
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"£{v / 1e6:.1f}M" if v else "0"))
     ax.set_xlim(-0.6, len(months) - 0.4)
     last = len(months) - 1
-    ax.text(last, identified[last] + unidentified[last], f"{last_day.day} days\n", ha="center", va="bottom",
-            fontsize=7.5, color=INK_MUTED, linespacing=0.6)
-    ax.legend(frameon=False, loc="upper left", fontsize=8.5, labelcolor=INK_SECONDARY, handlelength=1, handleheight=1)
+    ax.text(
+        last,
+        identified[last] + unidentified[last],
+        f"{last_day.day} days\n",
+        ha="center",
+        va="bottom",
+        fontsize=7.5,
+        color=INK_MUTED,
+        linespacing=0.6,
+    )
+    ax.legend(
+        frameon=False,
+        loc="upper left",
+        fontsize=8.5,
+        labelcolor=INK_SECONDARY,
+        handlelength=1,
+        handleheight=1,
+    )
     _title(
         fig,
         "Monthly net revenue, by whether the customer is known",
@@ -205,7 +249,14 @@ def chart_segments(con, path: Path) -> Path:
     ax.tick_params(axis="y", colors=INK_SECONDARY, labelsize=9)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
     ax.set_xlim(0, max(max(customers), max(revenue)) * 1.15)
-    ax.legend(frameon=False, loc="lower right", fontsize=8.5, labelcolor=INK_SECONDARY, handlelength=1, handleheight=1)
+    ax.legend(
+        frameon=False,
+        loc="lower right",
+        fontsize=8.5,
+        labelcolor=INK_SECONDARY,
+        handlelength=1,
+        handleheight=1,
+    )
     top = rows[0]
     _title(
         fig,

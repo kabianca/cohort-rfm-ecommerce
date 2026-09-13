@@ -21,7 +21,9 @@ def get_spark(app_name: str = "ancora") -> SparkSession:
         SparkSession.builder.appName(app_name)
         .master(os.environ.get("ANCORA_SPARK_MASTER", "local[*]"))
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .config(
+            "spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+        )
         # The CSV carries naive timestamps. Parsing and date extraction must
         # happen in the same zone on every machine, or a 23:30 invoice can
         # change day between the laptop that built the tables and the CI that

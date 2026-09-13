@@ -21,7 +21,18 @@ from ancora.bronze import RAW_COLUMNS
 # real rows in the ledger, but not sales of a product to a customer, so they
 # count for neither revenue nor RFM. Verified against the full dataset; the
 # other non-numeric codes (gift vouchers, `DCGS*`, `PADS`) are products.
-NON_PRODUCT_STOCK_CODES = ["POST", "DOT", "M", "C2", "D", "S", "BANK CHARGES", "AMAZONFEE", "CRUK", "B"]
+NON_PRODUCT_STOCK_CODES = [
+    "POST",
+    "DOT",
+    "M",
+    "C2",
+    "D",
+    "S",
+    "BANK CHARGES",
+    "AMAZONFEE",
+    "CRUK",
+    "B",
+]
 
 TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss"
 
@@ -72,11 +83,17 @@ def _reasons() -> F.Column:
         ("unparseable_quantity", F.col("quantity").isNull()),
         ("unparseable_invoice_date", F.col("invoice_ts").isNull()),
         ("unparseable_unit_price", F.col("unit_price").isNull()),
-        ("unparseable_customer_id", F.col("raw.CustomerID").isNotNull() & F.col("customer_id").isNull()),
+        (
+            "unparseable_customer_id",
+            F.col("raw.CustomerID").isNotNull() & F.col("customer_id").isNull(),
+        ),
         ("negative_unit_price", F.col("unit_price") < 0),
         ("zero_unit_price", F.col("unit_price") == 0),
         ("non_product_stock_code", F.col("stock_code").isin(NON_PRODUCT_STOCK_CODES)),
-        ("negative_quantity_outside_cancellation", (F.col("quantity") < 0) & ~F.col("is_cancellation")),
+        (
+            "negative_quantity_outside_cancellation",
+            (F.col("quantity") < 0) & ~F.col("is_cancellation"),
+        ),
         ("positive_quantity_in_cancellation", (F.col("quantity") > 0) & F.col("is_cancellation")),
     ]
     return F.array_compact(F.array(*[F.when(cond, F.lit(name)) for name, cond in checks]))

@@ -2,7 +2,7 @@ COMPOSE = docker compose
 RUN     = $(COMPOSE) run --rm ancora
 
 .DEFAULT_GOAL := help
-.PHONY: help build data run charts test lint shell clean
+.PHONY: help build data run charts fingerprint test lint shell clean
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -22,13 +22,15 @@ run:  ## Run bronze → silver → gold → serving. Optional: SNAPSHOT=2011-12-
 charts:  ## Redraw the README figures from the serving database into docs/img
 	$(RUN) python -m ancora charts
 
+fingerprint:  ## Row count and content hash of customer_rfm: run twice, compare
+	$(RUN) python -m ancora fingerprint
+
 test:  ## Run the test suite inside the image (no network, no dataset needed)
 	@mkdir -p data
 	$(RUN) python -m pytest -q
 
-lint:  ## Static checks
-	$(RUN) python -m ruff check .
-	$(RUN) python -m ruff format --check .
+lint:  ## Static checks (blocking in CI)
+	$(RUN) sh -c "ruff check . && ruff format --check ."
 
 shell:  ## Open a shell in the container
 	$(RUN) bash

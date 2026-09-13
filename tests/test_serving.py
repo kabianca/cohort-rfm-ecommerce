@@ -4,7 +4,9 @@ from ancora import serving
 def test_gold_tables_are_served_from_one_duckdb_file(run):
     con = serving.connect(run.layout.serving_db)
     try:
-        counts = {t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in serving.GOLD_TABLES}
+        counts = {
+            t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0] for t in serving.GOLD_TABLES
+        }
         reasons = dict(con.execute("SELECT reason, rows_ FROM quarantine_reasons").fetchall())
     finally:
         con.close()
@@ -25,6 +27,17 @@ def test_refresh_is_repeatable(run):
 
 def test_charts_are_drawn_from_the_serving_database(run, tmp_path):
     paths = serving.render_charts(run.layout, tmp_path)
-    assert [p.name for p in paths] == ["monthly_revenue.png", "cohort_retention.png", "segments.png"]
+    assert [p.name for p in paths] == [
+        "monthly_revenue.png",
+        "cohort_retention.png",
+        "segments.png",
+    ]
     for p in paths:
         assert p.stat().st_size > 10_000, p
+
+
+def test_fingerprint_is_stable(run):
+    first = serving.fingerprint(run.layout)
+    serving.refresh(run.layout)
+    assert serving.fingerprint(run.layout) == first
+    assert first[0] == 10

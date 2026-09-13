@@ -26,7 +26,6 @@ from pyspark.sql import functions as F
 from ancora import rfm
 
 
-
 def purchase() -> F.Column:
     """Built on demand: a Column needs a live session, and importing this
     module must not."""
@@ -72,10 +71,17 @@ def customer_rfm(sales: DataFrame, snapshot_date: date) -> DataFrame:
 
     scored = (
         per_customer.withColumn(
-            "r_score", rfm.quintile_score("recency_days", higher_is_better=False, partition="snapshot_date")
+            "r_score",
+            rfm.quintile_score("recency_days", higher_is_better=False, partition="snapshot_date"),
         )
-        .withColumn("f_score", rfm.quintile_score("frequency", higher_is_better=True, partition="snapshot_date"))
-        .withColumn("m_score", rfm.quintile_score("monetary", higher_is_better=True, partition="snapshot_date"))
+        .withColumn(
+            "f_score",
+            rfm.quintile_score("frequency", higher_is_better=True, partition="snapshot_date"),
+        )
+        .withColumn(
+            "m_score",
+            rfm.quintile_score("monetary", higher_is_better=True, partition="snapshot_date"),
+        )
         .withColumn("fm_score", rfm.fm_score())
         .withColumn("rfm", F.concat("r_score", "f_score", "m_score"))
         .withColumn("segment", rfm.segment())
@@ -109,7 +115,7 @@ def cohort_retention(sales: DataFrame) -> DataFrame:
     ).distinct()
 
     # Whole calendar months, not 30-day windows: 31 January to 1 February is 1.
-    month_number = lambda col: F.year(col) * 12 + F.month(col)  # noqa: E731
+    month_number = lambda col: F.year(col) * 12 + F.month(col)
     counts = (
         activity.join(cohorts, "customer_id")
         .withColumn("month_index", month_number("activity_month") - month_number("cohort_month"))
@@ -136,21 +142,33 @@ def monthly_sales(sales: DataFrame) -> DataFrame:
         sales.groupBy(F.trunc("invoice_date", "month").alias("month"))
         .agg(
             F.sum(amount).cast("decimal(14,3)").alias("revenue"),
-            F.coalesce(F.sum(F.when(identified, amount)), zero).cast("decimal(14,3)").alias("identified_revenue"),
-            F.coalesce(F.sum(F.when(~identified, amount)), zero).cast("decimal(14,3)").alias("unidentified_revenue"),
+            F.coalesce(F.sum(F.when(identified, amount)), zero)
+            .cast("decimal(14,3)")
+            .alias("identified_revenue"),
+            F.coalesce(F.sum(F.when(~identified, amount)), zero)
+            .cast("decimal(14,3)")
+            .alias("unidentified_revenue"),
             F.count_distinct(F.when(purchase(), F.col("invoice_no"))).alias("orders"),
             F.count_distinct(F.when(~purchase(), F.col("invoice_no"))).alias("cancellations"),
             F.count_distinct(F.when(purchase(), F.col("customer_id"))).alias("customers"),
             F.sum("quantity").alias("units"),
         )
         .select(
-            "month", "revenue", "identified_revenue", "unidentified_revenue",
-            "orders", "cancellations", "customers", "units",
+            "month",
+            "revenue",
+            "identified_revenue",
+            "unidentified_revenue",
+            "orders",
+            "cancellations",
+            "customers",
+            "units",
         )
     )
 
 
-def upsert(spark: SparkSession, df: DataFrame, table: Path, keys: list[str], scope: str | None = None) -> None:
+def upsert(
+    spark: SparkSession, df: DataFrame, table: Path, keys: list[str], scope: str | None = None
+) -> None:
     """MERGE `df` into `table` on `keys`. Rows of the target that the source no
     longer produces are deleted, optionally only within `scope` (a SQL
     predicate over the target aliased `t`), so a re-run converges to exactly
@@ -185,5 +203,7 @@ def build(
         keys=["customer_id", "snapshot_date"],
         scope=f"t.snapshot_date = DATE '{snapshot_date.isoformat()}'",
     )
-    upsert(spark, cohort_retention(sales), cohort_retention_table, keys=["cohort_month", "month_index"])
+    upsert(
+        spark, cohort_retention(sales), cohort_retention_table, keys=["cohort_month", "month_index"]
+    )
     upsert(spark, monthly_sales(sales), monthly_sales_table, keys=["month"])

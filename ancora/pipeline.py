@@ -9,7 +9,9 @@ from ancora import bronze, gold, serving, silver
 from ancora.config import Layout
 
 
-def run(spark: SparkSession, source: Path, layout: Layout, snapshot_date: date | None = None) -> date:
+def run(
+    spark: SparkSession, source: Path, layout: Layout, snapshot_date: date | None = None
+) -> date:
     """Returns the snapshot date actually used, so a caller that passed None
     can report which day anchored the run."""
     landed = bronze.ingest(spark, source, layout.bronze)

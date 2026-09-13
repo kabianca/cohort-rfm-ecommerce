@@ -78,7 +78,10 @@ def test_recency_is_anchored_to_the_snapshot_not_the_clock(run):
     for customer, row in moved.items():
         assert row.recency_days == base[customer].recency_days + 7
         assert (row.frequency, row.monetary, row.rfm, row.segment) == (
-            base[customer].frequency, base[customer].monetary, base[customer].rfm, base[customer].segment,
+            base[customer].frequency,
+            base[customer].monetary,
+            base[customer].rfm,
+            base[customer].segment,
         )
 
 
@@ -96,8 +99,11 @@ def test_revenue_by_segment_reconciles_with_identified_revenue(run):
     identified = run.sales.filter("customer_id IS NOT NULL").agg(F.sum("line_amount")).first()[0]
     excluded = (
         run.sales.filter("customer_id IS NOT NULL")
-        .groupBy("customer_id").agg(F.sum("line_amount").alias("net"))
-        .filter("net <= 0").agg(F.sum("net")).first()[0]
+        .groupBy("customer_id")
+        .agg(F.sum("line_amount").alias("net"))
+        .filter("net <= 0")
+        .agg(F.sum("net"))
+        .first()[0]
     )
     assert segments_total == Decimal("1303.260")
     assert identified == Decimal("1252.260")
@@ -116,7 +122,7 @@ def test_an_earlier_snapshot_sees_only_what_existed_then(run):
 
 def test_merge_converges_and_keeps_other_snapshots(spark, run, tmp_path):
     table = tmp_path / "customer_rfm"
-    args = dict(keys=["customer_id", "snapshot_date"])
+    args = {"keys": ["customer_id", "snapshot_date"]}
 
     march = gold.customer_rfm(run.sales, date(2011, 3, 31))
     gold.upsert(spark, march, table, scope="t.snapshot_date = DATE '2011-03-31'", **args)

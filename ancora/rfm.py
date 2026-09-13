@@ -47,5 +47,9 @@ def fm_score() -> F.Column:
 def segment() -> F.Column:
     expr = None
     for name, rule in SEGMENT_RULES:
-        expr = F.when(F.expr(rule), F.lit(name)) if expr is None else expr.when(F.expr(rule), F.lit(name))
+        expr = (
+            F.when(F.expr(rule), F.lit(name))
+            if expr is None
+            else expr.when(F.expr(rule), F.lit(name))
+        )
     return expr
