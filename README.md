@@ -102,7 +102,7 @@ Scores are quintiles of `percent_rank()`, which assigns tied values the same
 rank. In a wholesale dataset the ties are enormous: **1,493 of the 4,320
 customers bought exactly once**. `pd.qcut` on that column refuses outright
 (the 20 % and 40 % edges are both 1), and the usual workaround,
-`rank(method="first")` — or `ntile()` in Spark — splits the tie by whatever
+`rank(method="first")` (or `ntile()` in Spark), splits the tie by whatever
 order the rows happen to be in, so some once-only buyers become score 2
 because of where their row sat in a file. Here they are all score 1, and
 customers with four, five or six invoices all share score 4.
@@ -130,16 +130,16 @@ The dataset has three things a `dropna()` treats as one:
   the right customer's monetary value and shows up as negative revenue in the
   month it happened, instead of vanishing.
 - **10,670 rows the model cannot use** go to `silver.quarantine`, each with the
-  list of reasons it failed — 1,363 rows fail two rules at once. Bad data is
+  list of reasons it failed, 1,363 rows fail two rules at once. Bad data is
   treated as data, with a trail:
 
   | Reason | Rows |
   |---|---:|
-  | `duplicate` — byte-for-byte copy of another row | 5,268 |
-  | `non_product_stock_code` — postage, `Manual`, `AMAZONFEE`, discounts, bank charges | 2,912 |
+  | `duplicate`: byte-for-byte copy of another row | 5,268 |
+  | `non_product_stock_code`: postage, `Manual`, `AMAZONFEE`, discounts, bank charges | 2,912 |
   | `zero_unit_price` | 2,515 |
-  | `negative_quantity_outside_cancellation` — stock adjustments, all without a customer | 1,336 |
-  | `negative_unit_price` — two "Adjust bad debt" rows | 2 |
+  | `negative_quantity_outside_cancellation`: stock adjustments, all without a customer | 1,336 |
+  | `negative_unit_price`: two "Adjust bad debt" rows | 2 |
 
   Excluding the service codes moves annual revenue by under half a percent
   net, but the gross parts are large and would silently offset each other
@@ -178,7 +178,7 @@ and the CI that reads them.
 ### Gold is merged, not rebuilt
 
 Each gold table is updated with a Delta `MERGE`: matched rows are updated,
-new rows inserted, and rows the source no longer produces are deleted — for
+new rows inserted, and rows the source no longer produces are deleted for
 `customer_rfm`, only within the snapshot being written, so other snapshots
 are untouched. A re-run converges to exactly what the source says instead of
 accumulating leftovers, and the table's history shows it: the second run of
@@ -194,7 +194,7 @@ and a comment next to each says what was verified and when: Delta 4.4.0 is
 built and tested against Spark 4.2.0, and requires Java 17 or newer. The Delta
 jars and DuckDB's `delta` extension are fetched at image build time, so
 `make test` and `make run` need no network, and the first test in the suite
-writes a Delta table, merges into it and reads it back from DuckDB — the test
+writes a Delta table, merges into it and reads it back from DuckDB, the test
 that fails first if one of the three is bumped alone.
 
 ### DuckDB serves, Spark transforms
@@ -267,7 +267,7 @@ data does and not otherwise.
 
 <img src="docs/img/cohort_retention.png" width="100%" alt="Retention heatmap: share of each monthly cohort active in each following month">
 
-The December 2010 cohort is the largest and the stickiest — 37 % came back
+The December 2010 cohort is the largest and the stickiest, 37 % came back
 the next month, and 50 % bought in November 2011. It is also the only cohort
 that includes customers who were already buying before the data starts, which
 is the honest reason it looks so good.
@@ -305,7 +305,7 @@ cohort-rfm-ecommerce/
 ## Tests
 
 Every line of the design above is a test, and the suite runs against a
-41-row fixture that carries every trap the real file has — a cancellation, a
+41-row fixture that carries every trap the real file has, a cancellation, a
 null customer, an exact duplicate, a zero and a negative price, service stock
 codes, three customers tied on frequency, a purchase at 23:55 on 31 January.
 [`tests/fixtures/README.md`](tests/fixtures/README.md) says what each row is
@@ -342,7 +342,7 @@ start-up is most of the 100 seconds.
   silver inside a `raw` struct and are unpacked into the quarantine table.
 - **A `Column` needs a live session.** A module-level `F.col(...)` fails at
   import time; predicates are built on demand.
-- **A window partitioned by a constant is a single partition** — Spark warns
+- **A window partitioned by a constant is a single partition** Spark warns
   about it every run. The RFM scores rank every customer of a snapshot, so
   that is the design, and the warning is silenced with a comment saying why.
 - **Delta 4.1+ names its Maven artefact by Spark minor version**

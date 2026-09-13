@@ -72,7 +72,7 @@ flowchart LR
     G --> H["docs/img/*.png<br/><i>desenhados por código</i>"]
 ```
 
-Bronze é substituída por arquivo de origem, silver é reconstruída a partir da
+A camada bronze é substituída por arquivo de origem, silver é reconstruída a partir da
 bronze, gold é mesclada com `MERGE`. Uma segunda execução não muda nada, e o
 histórico do Delta confirma.
 
@@ -102,7 +102,7 @@ Os scores são quintis de `percent_rank()`, que atribui a valores iguais o
 mesmo _rank_. Num dataset de atacado os empates são enormes: **1.493 dos 4.320
 clientes compraram exatamente uma vez**. `pd.qcut` nessa coluna se recusa a
 rodar (as arestas de 20 % e 40 % são ambas 1), e o contorno habitual,
-`rank(method="first")` — ou `ntile()` no Spark — divide o empate pela ordem em
+`rank(method="first")` (ou `ntile()` no Spark) divide o empate pela ordem em
 que as linhas por acaso estavam, de modo que alguns compradores de uma vez só
 viram score 2 por causa da posição da sua linha num arquivo. Aqui todos são
 score 1, e clientes com quatro, cinco ou seis faturas compartilham o score 4.
@@ -125,26 +125,26 @@ O dataset tem três coisas que um `dropna()` trata como uma só:
   15,4 % do ano, £ 1,5 mi de £ 9,8 mi. O `dropna()` do notebook as removia de
   todos os meses.
 - **8.668 linhas de cancelamento** (`InvoiceNo` começando com `C`, quantidade
-  negativa), no total −£ 475.901. O notebook as removia; aqui ficam na silver
+  negativa), no total -£ 475.901. O notebook as removia; aqui ficam na silver
   com o sinal, e a camada gold as compensa: um cancelamento reduz o valor
   monetário do cliente certo e aparece como receita negativa no mês em que
   aconteceu, em vez de sumir.
 - **10.670 linhas que o modelo não consegue usar** vão para
-  `silver.quarantine`, cada uma com a lista de motivos pelos quais falhou —
+  `silver.quarantine`, cada uma com a lista de motivos pelos quais falhou,
   1.363 falham em duas regras ao mesmo tempo. Dado ruim é tratado como dado,
   com rastro:
 
   | Motivo | Linhas |
   |---|---:|
-  | `duplicate` — cópia byte a byte de outra linha | 5.268 |
-  | `non_product_stock_code` — postagem, `Manual`, `AMAZONFEE`, descontos, tarifas bancárias | 2.912 |
+  | `duplicate`: cópia byte a byte de outra linha | 5.268 |
+  | `non_product_stock_code`: postagem, `Manual`, `AMAZONFEE`, descontos, tarifas bancárias | 2.912 |
   | `zero_unit_price` | 2.515 |
-  | `negative_quantity_outside_cancellation` — ajustes de estoque, todos sem cliente | 1.336 |
-  | `negative_unit_price` — duas linhas de "Adjust bad debt" | 2 |
+  | `negative_quantity_outside_cancellation`: ajustes de estoque, todos sem cliente | 1.336 |
+  | `negative_unit_price`: duas linhas de "Adjust bad debt" | 2 |
 
   Excluir os códigos de serviço move a receita anual em menos de meio por
   cento líquido, mas as partes brutas são grandes e se compensariam em silêncio
-  dentro de "receita": postagem é £ 272 mil, tarifas da Amazon são −£ 222 mil.
+  dentro de "receita": postagem é £ 272 mil, tarifas da Amazon são - £ 222 mil.
   As duas são recuperáveis na tabela de quarentena.
 
 Quem conta como cliente segue do mesmo princípio. Um cliente pertence à camada
@@ -181,7 +181,7 @@ tabelas e o CI que as lê.
 
 Cada tabela gold é atualizada com um `MERGE` do Delta: linhas encontradas são
 atualizadas, novas são inseridas, e linhas que a origem deixou de produzir são
-apagadas — em `customer_rfm`, só dentro do _snapshot_ que está sendo escrito,
+apagadas em `customer_rfm`, só dentro do _snapshot_ que está sendo escrito,
 então os outros ficam intactos. Uma reexecução converge para exatamente o que
 a origem diz em vez de acumular sobras, e o histórico da tabela mostra isso: a
 segunda execução do dataset completo é um `MERGE` com 4.320 linhas atualizadas,
@@ -197,7 +197,7 @@ quando: o Delta 4.4.0 é construído e testado contra o Spark 4.2.0 e exige Java
 17 ou mais novo. Os _jars_ do Delta e a extensão `delta` do DuckDB são baixados
 na construção da imagem, então `make test` e `make run` não precisam de rede, e
 o primeiro teste da suíte escreve uma tabela Delta, faz `MERGE` nela e a lê de
-volta pelo DuckDB — o teste que falha primeiro se uma das três versões for
+volta pelo DuckDB, o teste que falha primeiro se uma das três versões for
 mudada sozinha.
 
 ### DuckDB serve, Spark transforma
@@ -270,7 +270,7 @@ os dados mudam e não de outro jeito.
 
 <img src="docs/img/cohort_retention.png" width="100%" alt="Heatmap de retenção: parcela de cada coorte mensal ativa em cada mês seguinte">
 
-A coorte de dezembro de 2010 é a maior e a mais fiel — 37 % voltaram no mês
+A coorte de dezembro de 2010 é a maior e a mais fiel e 37 % voltaram no mês
 seguinte, e 50 % compraram em novembro de 2011. É também a única coorte que
 inclui clientes que já compravam antes do início dos dados, que é o motivo
 honesto de ela parecer tão boa.
@@ -308,7 +308,7 @@ cohort-rfm-ecommerce/
 ## Testes
 
 Cada linha do desenho acima é um teste, e a suíte roda contra uma _fixture_ de
-41 linhas que carrega cada armadilha do arquivo real — um cancelamento, um
+41 linhas que carrega cada armadilha do arquivo real: um cancelamento, um
 cliente nulo, uma duplicata exata, um preço zero e um negativo, códigos de
 serviço, três clientes empatados em frequência, uma compra às 23h55 de 31 de
 janeiro. [`tests/fixtures/README.md`](tests/fixtures/README.md) diz para que
@@ -346,7 +346,7 @@ Spark é a maior parte dos 100 segundos.
   tabela de quarentena.
 - **Uma `Column` precisa de sessão viva.** Um `F.col(...)` no nível do módulo
   falha na importação; os predicados são construídos sob demanda.
-- **Uma janela particionada por constante é uma partição só** — e o Spark
+- **Uma janela particionada por constante é uma partição só** e o Spark
   avisa a cada execução. Os scores de RFM ranqueiam todos os clientes de um
   _snapshot_, então esse é o desenho, e o aviso é silenciado com um comentário
   dizendo por quê.
