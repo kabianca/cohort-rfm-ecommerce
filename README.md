@@ -17,6 +17,8 @@ transformations, DuckDB for serving, one Docker image for all of it.
   <img src="https://img.shields.io/badge/license-GPL--3.0-green" alt="GPL-3.0 license">
 </p>
 
+**English** · [Português](README.pt-BR.md)
+
 ## Why I rebuilt this
 
 This repository started as the third project of a data-analysis
@@ -371,7 +373,6 @@ would build them:
 | **Orchestration** | Scheduling and backfill | Maré already shows the pattern; a DAG calling `pipeline.run` per snapshot |
 | **Country in the gold layer** | The notebook split the UK from the rest; the data is there | A `country` dimension on `cohort_retention` and `monthly_sales` |
 | **Declarative expectations** | Great Expectations or Soda over silver | The quarantine rules become expectations; the table boundary stays |
-| **A Portuguese README** | `README.pt-BR.md` | — |
 
 ## What I would do differently in production
 
