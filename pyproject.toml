@@ -37,3 +37,7 @@ filterwarnings = ["ignore::DeprecationWarning"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# ruff 0.16 formats Python blocks inside Markdown. The README quotes the
+# legacy notebook verbatim, single quotes included; that is a quotation, not
+# code to be tidied.
+extend-exclude = ["*.md"]

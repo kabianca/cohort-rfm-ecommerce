@@ -10,5 +10,11 @@ services:
       - ./tests:/app/tests
       - ./docs:/app/docs
       - ./data:/app/data
+      # Lint reads its config and the READMEs from the working tree, not from
+      # the copies baked into the image at build time, or `make lint` passes
+      # locally on a stale image and fails in CI on a fresh one.
+      - ./pyproject.toml:/app/pyproject.toml:ro
+      - ./README.md:/app/README.md:ro
+      - ./README.pt-BR.md:/app/README.pt-BR.md:ro
     environment:
       ANCORA_DATA_DIR: /app/data
