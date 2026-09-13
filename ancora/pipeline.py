@@ -1,11 +1,11 @@
-"""bronze → silver → gold, end to end, for one source file."""
+"""bronze → silver → gold → DuckDB, end to end, for one source file."""
 
 from datetime import date
 from pathlib import Path
 
 from pyspark.sql import SparkSession
 
-from ancora import bronze, gold, silver
+from ancora import bronze, gold, serving, silver
 from ancora.config import Layout
 
 
@@ -23,4 +23,5 @@ def run(spark: SparkSession, source: Path, layout: Layout, snapshot_date: date |
         layout.gold_cohort_retention,
         layout.gold_monthly_sales,
     )
+    serving.refresh(layout)
     return snapshot

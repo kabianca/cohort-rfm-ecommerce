@@ -2,7 +2,7 @@ COMPOSE = docker compose
 RUN     = $(COMPOSE) run --rm ancora
 
 .DEFAULT_GOAL := help
-.PHONY: help build data run test lint shell clean
+.PHONY: help build data run charts test lint shell clean
 
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -18,6 +18,9 @@ data:  ## Download the UCI Online Retail dataset into data/raw (never committed)
 run:  ## Run bronze → silver → gold → serving. Optional: SNAPSHOT=2011-12-09
 	@mkdir -p data
 	$(RUN) python -m ancora run $(if $(SNAPSHOT),--snapshot-date $(SNAPSHOT),)
+
+charts:  ## Redraw the README figures from the serving database into docs/img
+	$(RUN) python -m ancora charts
 
 test:  ## Run the test suite inside the image (no network, no dataset needed)
 	@mkdir -p data
